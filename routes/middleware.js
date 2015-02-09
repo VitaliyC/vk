@@ -18,7 +18,7 @@ module.exports = function(app, callback) {
     validate(req.query, schemas.getGroupInfo, next);
   });
   app.use('/message', function(req, res, next) {
-    validate(req.body, schemas.getGroupInfo, next);
+    validate(req.body, schemas.message, next);
   });
   callback();
 };

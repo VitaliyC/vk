@@ -9,4 +9,4 @@ var express = require('express'),
 app.use('/', express.static(__dirname + '/public'));
 app.use(bodyParser());
 init(app, console.log);
-app.listen(3000);
+app.listen(8080);
