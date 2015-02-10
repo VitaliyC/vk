@@ -15,7 +15,7 @@ exports.addGroup = function(req, res, app) {
     function(err) {
       if(err) console.log(err);
       app.get('/' + saveObj.url, function(req, res) {
-        res.sendfile(__dirname + './../views/index.html');
+        res.sendfile(__home + '/views/index.html');
       });
       res.send({success: true});
     }
