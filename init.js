@@ -36,13 +36,15 @@ function routing(app, next) {
 }
 
 function createRouts(app, next) {
-  db.collection('groups').find({},['url']).toArray(
+  db.collection('groups').find({}).toArray(
     function(err, groups) {
       if(err) return next(err);
       for(var i = 0; i < groups.length; i++) {
-        app.get('/' + groups[i].url, function(req, res) {
-          res.sendfile(__home + '/views/index.html');
-        });
+        (function(data) {
+          app.get('/' + data.url, function(req, res) {
+            res.render('template', data);
+          });
+        }(groups[i]))
       }
       next()
     }

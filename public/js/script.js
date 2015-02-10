@@ -2,24 +2,7 @@
  * Created by nikolay on 08.02.15.
  */
 (function() {
-  var group = {
-    url: window.location.pathname.toString().replace('/','')
-  };
-
-  $.ajax({
-    url: 'getGroupInfo',
-    type: 'get',
-    data: {url: group.url},
-    dataType: 'json',
-    success: function(data) {
-      group = data;
-      $('.group-logo').css('background-image', "url(" + group.imgUrl + ")");
-      $('#group-name').text(group.name);
-      sending();
-    }
-  });
-
-  function sending() {
+  $(document).ready(function(){
     $('#sendButton').on('click', function() {
       var message = $('textArea').val();
       var sendData = {
@@ -38,5 +21,5 @@
         }
       });
     })
-  }
+  })
 })();

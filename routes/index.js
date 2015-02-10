@@ -14,9 +14,11 @@ exports.addGroup = function(req, res, app) {
     saveObj,
     function(err) {
       if(err) console.log(err);
-      app.get('/' + saveObj.url, function(req, res) {
-        res.sendfile(__home + '/views/index.html');
-      });
+      (function(data) {
+        app.get('/' + data.url, function(req, res) {
+          res.render('template', data);
+        });
+      }(saveObj));
       res.send({success: true});
     }
   )
