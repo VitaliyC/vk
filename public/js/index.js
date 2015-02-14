@@ -5,10 +5,8 @@ $(document).ready(function () {
   VK.init({
     apiId: consts.appId
   });
-  methods.vkAuth();
   $('#getGroups').on('click', function () {
-    methods.getUserGroups();
-    methods.goToDouble();
+    methods.vkAuth();
   });
   $('#main').on('click', methods.goToMain);
   ko.applyBindings(model);
@@ -26,6 +24,8 @@ var methods = {
       if (response.session) {
         consts.userId = response.session.user.id;
         consts.token = response.session.sid;
+        methods.getUserGroups();
+        methods.goToDouble();
       } else {
         /* Пользователь нажал кнопку Отмена в окне авторизации */
       }
