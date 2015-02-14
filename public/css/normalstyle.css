@@ -202,7 +202,8 @@ body {
 }
 
 .main-container {
-    width: 1000px;
+    margin: auto;
+    width: 900px;
     padding: 24px 0 0 24px;
     height: 600px;
 }
@@ -215,6 +216,7 @@ body {
 }
 
 .main-container .text-block {
+    margin-top: 20px;
     float: left;
     max-width: 620px
 }
@@ -240,7 +242,7 @@ body {
 
 .main-container .img {
     float: left;
-    margin-left: 190px;
+    margin-left: 40px;
     width: 80px;
     height: 80px;
 }
@@ -267,7 +269,7 @@ body {
     height: 80px;
     width: 730px;
     float: left;
-    margin: 10px 0 0 175px;
+    margin: 10px 0 0 25px;
 }
 
 .main-container .button-container .button img {
