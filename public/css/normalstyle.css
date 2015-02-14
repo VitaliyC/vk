@@ -280,6 +280,10 @@ body {
     margin: 10px 0 0 25px;
 }
 
+.main-container .button-container img {
+    float: right;
+}
+
 .main-container .button-container .button img {
     width: 234px;
     height: 56px;

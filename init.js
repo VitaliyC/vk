@@ -3,13 +3,44 @@
  */
 var mongo = require('mongodb'),
   middleware = require('./routes/middleware'),
+  fs = require('fs'),
+  multer = require('multer'),
   routes = require('./routes');
-module.exports = function(app, callback) {
-  dbInit(function(err) {
-    if(err) return callback(err);
-    middleware(app, function() {
-      routing(app, function(err) {
-        if(err) return callback(err);
+
+var multerConf = {
+  dest: './public/uploads/',
+  limits: {
+    fieldNameSize: 100,
+    fileSize: 3000000,
+    files: 1,
+    fields: 5
+  },
+  onFileSizeLimit: function(file) {
+    fs.unlink('./' + file.path);
+    return false;
+  },
+  rename: function (fieldname, filename) {
+    return filename + Date.now();
+  },
+  onFileUploadStart: function (file) {
+    console.log(file.originalname + ' is starting ...')
+  },
+  onFileUploadComplete: function (file) {
+    if(file.mimetype != 'image/jpeg') {
+      fs.unlink('./' + file.path);
+      return false;
+    }
+    console.log(file.fieldname + ' uploaded to  ' + file.path);
+    file.success = true;
+  }
+};
+
+module.exports = function (app, callback) {
+  dbInit(function (err) {
+    if (err) return callback(err);
+    middleware(app, function () {
+      routing(app, function (err) {
+        if (err) return callback(err);
         callback('start');
       })
     })
@@ -26,7 +57,15 @@ function dbInit(next) {
 }
 
 function routing(app, next) {
-  app.get('/addGroup', function(req, res) {
+  app.post('/loadPhoto', multer(multerConf), function (req, res) {
+    if (req.files.userPhoto.success) {
+      res.send({
+        filePath: 'http://aposting.me/uploads/' + req.files.userPhoto.name,
+        name: req.files.userPhoto.name
+      });
+    }
+  });
+  app.get('/addGroup', function (req, res) {
     routes.addGroup(req, res, app);
   });
   app.get('/getAddedGroups', routes.getAddedGroups);
@@ -37,11 +76,11 @@ function routing(app, next) {
 
 function createRouts(app, next) {
   db.collection('groups').find({}).toArray(
-    function(err, groups) {
-      if(err) return next(err);
-      for(var i = 0; i < groups.length; i++) {
-        (function(data) {
-          app.get('/' + data.url, function(req, res) {
+    function (err, groups) {
+      if (err) return next(err);
+      for (var i = 0; i < groups.length; ++i) {
+        (function (data) {
+          app.get('/' + data.url, function (req, res) {
             res.render('template', data);
           });
         }(groups[i]))

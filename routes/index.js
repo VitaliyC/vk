@@ -1,7 +1,11 @@
 /**
  * Created by nikolay on 07.02.15.
  */
-var request = require('request');
+var request = require('request'),
+  fs = require('fs'),
+  rest = require('restler');
+
+var token = 'f083a052fa33dfe3ab210ddf8e19297ae2ee0cea703323aa60bcfe79751113dff7e3a49ce4ac002905dd2';
 exports.addGroup = function(req, res, app) {
   var saveObj = {
     name: req.query.name,
@@ -21,10 +25,8 @@ exports.addGroup = function(req, res, app) {
       }(saveObj));
       var message = 'Поздравляем, сообщество подключено к системе! Ваша персональная ссылка для отправки историй - http://aposting.me/' + saveObj.url,
         id = saveObj._id;
-      sendMessage(id, message, function(result) {
-        if(result) res.send({success: true});
-        else res.send({success: false});
-      })
+      sendMessage(id, message);
+      res.send({success: true});
     }
   )
 };
@@ -49,26 +51,62 @@ exports.getGroupInfo = function(req, res) {
 };
 
 exports.message = function(req, res) {
-  sendMessage(req.body.group._id, req.body.message, function(result) {
-    if(result) res.send({success: true});
-    else res.send({success: false});
-  });
+  if(req.body.message.length == 0 && !req.body.img) return res.send({success: true});
+  sendMessage(req.body.group._id, req.body.message, req.body.img);
+  res.send({success: true});
 };
 
-function sendMessage(id, message, callback) {
-  var token = '7004cafb92853c6cb94d079314faf27f996d33f26a7fc893fb6f2d0eadf3426ae8de22faf7369c3ac0cc7',
-    methodUrl = 'https://api.vk.com/method/wall.post?owner_id='+'-'+id+'&friends_only=0&message='+message+
-      '&access_token='+token;
-  request(methodUrl, function(err, respond, body) {
-    if(err) {
-      console.log(err);
-    } else {
+function sendMessage(id, message, img) {
+  if(!img){
+    var methodUrl = 'https://api.vk.com/method/wall.post?owner_id=-' + id + '&friends_only=0&message=' + message +
+      '&access_token=' + token;
+    request(methodUrl, function(err, respond, body) {
+      if(err) return console.error(err);
       body = JSON.parse(body);
-      if(body && body.response) {
-        if('post_id' in body.response) {
-          callback(true);
-        }
-      } else callback(false);
+      if(!body || !body.response || !body.response.post_id) return console.error(new Error('Something wrong'));
+    });
+    return;
+  }
+
+  var getWallUploadServer = 'https://api.vk.com/method/photos.getWallUploadServer?group_id=' + id + '&access_token='+token;
+  request(getWallUploadServer, function(err, res, body) {
+      if(err) return console.error(err);
+      body = JSON.parse(body);
+      if (!body.response.upload_url) return console.error(new Error('No upload_url'));
+
+      var path = __home + '/public/uploads/' + img;
+      fs.stat(path, function(err, stats) {
+        if(err) return console.error(err);
+
+        rest.post(body.response.upload_url, {
+          multipart: true,
+          data: {
+            "folder_id": "0",
+            'photo': rest.file(path, null, stats.size, null, 'image/jpg')
+          }
+        }).on('complete', function(data) {
+          data = JSON.parse(data);
+          if (!data || !data.server || !data.photo || !data.hash) return console.error(new Error('Something wrong'));
+
+          var getWallUploadServer = 'https://api.vk.com/method/photos.saveWallPhoto?group_id=' + id + '&photo=' +
+            data.photo + '&server=' + data.server + '&hash=' + data.hash + '&access_token=' + token;
+
+          request(getWallUploadServer, function(err, res, body) {
+            if(err) return console.error(err);
+
+            body = JSON.parse(body);
+            if (!body.response[0].id) return console.error(new Error('Something wrong!!!'));
+
+            var methodUrl = 'https://api.vk.com/method/wall.post?owner_id=-' + id + '&friends_only=0&message=' + message +
+              '&attachment=' + body.response[0].id + '&access_token=' + token;
+            request(methodUrl, function(err, respond, body) {
+              if(err) return console.error(err);
+              body = JSON.parse(body);
+              if(!body || !body.response || !body.response.post_id) return console.error(new Error('Something wrong'));
+            });
+          });
+        });
+      });
     }
-  })
+  );
 }

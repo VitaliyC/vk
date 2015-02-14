@@ -69,7 +69,8 @@ var schemas = {
           userId: {type: 'string', minLength: 1, maxLength: 11}
         }
       },
-      message: {type: 'string', minLength: 1, maxLength:500}
+      message: {type: 'string', minLength: 0, maxLength:500},
+      img: {type: 'string', minLength: 1, maxLength:100}
     }
   }
 };
