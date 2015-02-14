@@ -67,11 +67,12 @@
         <div class="group-container">
             <!-- ko foreach: groups -->
             <div class="group">
-                <div class="text" data-bind="text: name()"></div>
+                <div class="text" data-bind="text: name"></div>
                 <div class="img" data-bind="style: { backgroundImage: 'url(\'' + imgUrl() + '\')' }"></div>
-                <div class="button" data-bind="click: $parent.addNewGroup">
+                <div class="button" data-bind="click: $parent.addNewGroup, visible: isNew">
                     <img src="images/connectgroup.png">
                 </div>
+                <textarea class="textarea" disabled="disabled" data-bind="visible: old, value: 'http://aposting.me/' + url()"></textarea>
             </div>
             <!-- /ko -->
         </div>

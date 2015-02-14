@@ -37,15 +37,24 @@ var methods = {
       var groups = r.response;
       methods.getAddedGroups(function(userGroups) {
         if (groups.length > 1) {
-          groups = groups.filter(function(i) {
-            return userGroups.indexOf(i.gid) == -1;
+          groups = groups.map(function(i) {
+            if (userGroups.indexOf(i.gid) > -1) {
+              i.isNew = false;
+              i.old = true;
+            } else {
+              i.isNew = true;
+              i.old = false;
+            }
+            return i;
           });
           for (var i = 1; i < groups.length; ++i) {
             var group = {
               id: ko.observable(groups[i].gid),
               name: ko.observable(groups[i].name),
               imgUrl: ko.observable(groups[i].photo_big),
-              url: ko.observable(groups[i].screen_name)
+              url: ko.observable(groups[i].screen_name),
+              isNew: ko.observable(groups[i].isNew),
+              old: ko.observable(groups[i].old)
             };
             model.groups.push(group);
           }
@@ -65,7 +74,7 @@ var methods = {
     $.ajax({
       url: 'getAddedGroups',
       type: 'get',
-      data: {userId: consts.userId},
+      data: {},
       dataType: 'json',
       success: callback
     })

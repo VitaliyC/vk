@@ -25,11 +25,8 @@ exports.addGroup = function(req, res, app) {
 };
 
 exports.getAddedGroups = function(req, res) {
-  var userId = parseInt(req.query.userId);
   db.collection('groups').find(
-    {
-      userId: userId
-    }
+    {}
   ).toArray(function(err, data) {
       if(err) console.log(err);
       data = data.map(function(i) {

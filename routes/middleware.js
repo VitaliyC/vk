@@ -44,9 +44,7 @@ var schemas = {
   },
   'getAddedGroups': {
     type: 'object',
-    required: ['userId'],
     properties: {
-      userId: {type: 'string', minLength: 1, maxLength: 11}
     }
   },
   'getGroupInfo': {
