@@ -202,13 +202,14 @@ body {
 }
 
 .main-container {
-    width: 1200px;
-    padding: 53px 0 0 55px;
+    width: 1000px;
+    padding: 24px 0 0 24px;
+    height: 600px;
 }
 
 .group-logo {
-    width: 200px;
-    height: 200px;
+    width: 150px;
+    height: 150px;
     float: left;
     border-radius: 100%;
 }
@@ -221,9 +222,9 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin: 12px 0 0 15px;
+    margin: 12px 0 0 10px;
     font-family: "AA";
-    font-size: 30pt;
+    font-size: 20pt;
     text-decoration: underline;
 }
 
@@ -233,30 +234,30 @@ body {
     overflow: visible;
     color: rgb(119,119,119);
     font-family: cursive;
-    font-size: 20pt;
+    font-size: 15pt;
     text-decoration: none;
 }
 
 .main-container .img {
     float: left;
-    margin-left: 200px;
-    width: 100px;
-    height: 100px;
+    margin-left: 190px;
+    width: 80px;
+    height: 80px;
 }
 .main-container img {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
 }
 
 .main-container textarea {
-    outline:none;
+    outline: none;
     resize: none;
     color: rgb(119,119,119);
     font-family: cursive;
     font-size: 20pt;
     border-radius: 20px;
     margin: 20px 0 0 20px;
-    width: 915px;
+    width: 730px;
     height: 320px;
     float: left;
     border: 2px solid rgb(119,119,119);
@@ -264,9 +265,9 @@ body {
 
 .main-container .button-container {
     height: 80px;
-    width: 920px;
-    float: right;
-    margin: 10px 55px 0 0;
+    width: 730px;
+    float: left;
+    margin: 10px 0 0 175px;
 }
 
 .main-container .button-container .button img {
