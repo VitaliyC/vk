@@ -19,7 +19,12 @@ exports.addGroup = function(req, res, app) {
           res.render('template', data);
         });
       }(saveObj));
-      res.send({success: true});
+      var message = 'Поздравляем, сообщество подключено к системе! Ваша персональная ссылка для отправки историй - http://aposting.me/' + saveObj.url,
+        id = saveObj._id;
+      sendMessage(id, message, function(result) {
+        if(result) res.send({success: true});
+        else res.send({success: false});
+      })
     }
   )
 };
@@ -44,8 +49,15 @@ exports.getGroupInfo = function(req, res) {
 };
 
 exports.message = function(req, res) {
+  sendMessage(req.body.group._id, req.body.message, function(result) {
+    if(result) res.send({success: true});
+    else res.send({success: false});
+  });
+};
+
+function sendMessage(id, message, callback) {
   var token = '7004cafb92853c6cb94d079314faf27f996d33f26a7fc893fb6f2d0eadf3426ae8de22faf7369c3ac0cc7',
-    methodUrl = 'https://api.vk.com/method/wall.post?owner_id='+'-'+req.body.group._id+'&friends_only=0&message='+req.body.message+
+    methodUrl = 'https://api.vk.com/method/wall.post?owner_id='+'-'+id+'&friends_only=0&message='+message+
       '&access_token='+token;
   request(methodUrl, function(err, respond, body) {
     if(err) {
@@ -53,8 +65,8 @@ exports.message = function(req, res) {
     } else {
       body = JSON.parse(body);
       if('post_id' in body.response) {
-        res.send({success: true});
-      }
+        callback(true);
+      } else callback(false);
     }
   })
-};
+}
