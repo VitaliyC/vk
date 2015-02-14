@@ -64,8 +64,10 @@ function sendMessage(id, message, callback) {
       console.log(err);
     } else {
       body = JSON.parse(body);
-      if('post_id' in body.response) {
-        callback(true);
+      if(body && body.response) {
+        if('post_id' in body.response) {
+          callback(true);
+        }
       } else callback(false);
     }
   })
