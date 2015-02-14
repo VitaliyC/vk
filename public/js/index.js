@@ -98,7 +98,10 @@ var model = {
       data: req,
       dataType: 'json',
       success: function (result) {
-        if (result.success) model.groups.remove(self);
+        if (result.success) {
+          self.isNew(false);
+          self.old(true);
+        }
       }
     })
   }
