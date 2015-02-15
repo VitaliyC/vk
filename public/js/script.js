@@ -15,7 +15,8 @@
         dataType: 'json',
         success: function(data) {
           if(data.success) {
-            document.location.replace("http://aposting.me");
+            $('.main-container').hide();
+            $('.success-block').show();
           }
         }
       });

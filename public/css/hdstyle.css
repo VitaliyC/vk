@@ -247,3 +247,33 @@ body {
 .main-container .button-container .button + .button {
     float: right;
 }
+
+.success-block {
+    display: none;
+    max-width: 790px;
+    margin: auto;
+    padding-top: 100px;
+}
+
+.success-block .text {
+    font-family: cursive;
+    font-size: 40pt;
+    margin: 20px 0 0 20px;
+    float: left;
+}
+
+.button-container .button {
+    margin: 45px 43px 0 30px;
+    float: left;
+    font-family: 'AA';
+    font-size: 20pt;
+    color: rgb(119,119,119);
+}
+
+.button-container .button:hover {
+    color: cornflowerblue;
+}
+
+.button-container .button +.button {
+    float: right;
+}
