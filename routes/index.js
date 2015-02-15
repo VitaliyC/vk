@@ -63,7 +63,12 @@ function sendMessage(id, message, img) {
     request(methodUrl, function(err, respond, body) {
       if(err) return console.error(err);
       body = JSON.parse(body);
-      if(!body || !body.response || !body.response.post_id) return console.error(new Error('Something wrong'));
+      if(!body || !body.response || !body.response.post_id) {
+        console.error(new Error('Something wrong'));
+        console.error(body);
+        return;
+      }
+      addCount(id);
     });
     return;
   }
@@ -86,7 +91,11 @@ function sendMessage(id, message, img) {
           }
         }).on('complete', function(data) {
           data = JSON.parse(data);
-          if (!data || !data.server || !data.photo || !data.hash) return console.error(new Error('Something wrong'));
+          if (!data || !data.server || !data.photo || !data.hash) {
+            console.error(new Error('Something wrong'));
+            console.log(data);
+            return;
+          }
 
           var getWallUploadServer = 'https://api.vk.com/method/photos.saveWallPhoto?group_id=' + id + '&photo=' +
             data.photo + '&server=' + data.server + '&hash=' + data.hash + '&access_token=' + token;
@@ -102,11 +111,31 @@ function sendMessage(id, message, img) {
             request(methodUrl, function(err, respond, body) {
               if(err) return console.error(err);
               body = JSON.parse(body);
-              if(!body || !body.response || !body.response.post_id) return console.error(new Error('Something wrong'));
+              if(!body || !body.response || !body.response.post_id) {
+                console.error(new Error('Something wrong'));
+                console.log(body);
+                return;
+              }
+              addCount(id);
             });
           });
         });
       });
     }
   );
+}
+
+function addCount(id) {
+  db.collection('groups').update(
+    {
+      _id: parseInt(id)
+    },
+    {
+      $inc: {
+        count: 1
+      }
+    },function(err) {
+      if(err) console.error(err);
+    }
+  )
 }
