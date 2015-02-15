@@ -262,7 +262,7 @@ body {
     float: left;
 }
 
-.button-container .button {
+.success-block .button-container .button {
     margin: 45px 43px 0 30px;
     float: left;
     font-family: 'AA';
@@ -270,10 +270,10 @@ body {
     color: rgb(119,119,119);
 }
 
-.button-container .button:hover {
+.success-block .button-container .button:hover {
     color: cornflowerblue;
 }
 
-.button-container .button +.button {
+.success-block .button-container .button +.button {
     float: right;
 }
