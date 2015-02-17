@@ -277,3 +277,12 @@ body {
 .success-block .button-container .button +.button {
     float: right;
 }
+
+.count {
+    font-family: 'AA';
+    font-size: 12pt;
+    color: rgb(119,119,119);
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+}

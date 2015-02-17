@@ -7,6 +7,8 @@ var mongo = require('mongodb'),
   multer = require('multer'),
   routes = require('./routes');
 
+var fileFilter = ['image/jpeg', 'image/png'];
+
 var multerConf = {
   dest: './public/uploads/',
   limits: {
@@ -26,7 +28,7 @@ var multerConf = {
     console.log(file.originalname + ' is starting ...')
   },
   onFileUploadComplete: function (file) {
-    if(file.mimetype != 'image/jpeg') {
+    if(fileFilter.indexOf(file.mimetype) == -1) {
       fs.unlink('./' + file.path);
       return false;
     }
@@ -51,7 +53,22 @@ function dbInit(next) {
   mongo.connect('mongodb://localhost:27017/aposting', function (err, conn) {
       if (err) return next(err);
       global.db = conn;
-      next();
+      db.collection('groups').aggregate(
+        [
+          {
+            $group: {
+              _id:{},
+              count: {
+                $sum: '$count'
+              }
+            }
+          }
+        ],function(err, data) {
+          if(err) return next(err);
+          global.countMessages = data[0].count;
+          next()
+        }
+      );
     }
   );
 }
@@ -81,6 +98,7 @@ function createRouts(app, next) {
       for (var i = 0; i < groups.length; ++i) {
         (function (data) {
           app.get('/' + data.url, function (req, res) {
+            data.count = countMessages;
             res.render('template', data);
           });
         }(groups[i]))

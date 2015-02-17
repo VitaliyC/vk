@@ -20,6 +20,7 @@ exports.addGroup = function(req, res, app) {
       if(err) console.log(err);
       (function(data) {
         app.get('/' + data.url, function(req, res) {
+          data.count = countMessages;
           res.render('template', data);
         });
       }(saveObj));
@@ -136,6 +137,7 @@ function addCount(id) {
       }
     },function(err) {
       if(err) console.error(err);
+      ++countMessages;
     }
   )
 }
