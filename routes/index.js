@@ -5,7 +5,7 @@ var request = require('request'),
   fs = require('fs'),
   rest = require('restler');
 
-var token = 'f083a052fa33dfe3ab210ddf8e19297ae2ee0cea703323aa60bcfe79751113dff7e3a49ce4ac002905dd2';
+var token = '2f3b9efb3ac528935e925b63c340efe9645ddb1ad6c2c9cb9f84c5592694632fd97a51c8dc804d7cc1f41';
 exports.addGroup = function(req, res, app) {
   var saveObj = {
     name: req.query.name,
@@ -69,6 +69,7 @@ function sendMessage(id, message, img) {
         console.error(body);
         return;
       }
+      sendNotification(id, message);
       addCount(id);
     });
     return;
@@ -117,6 +118,7 @@ function sendMessage(id, message, img) {
                 console.log(body);
                 return;
               }
+              sendNotification(id, message);
               addCount(id);
             });
           });
@@ -126,6 +128,11 @@ function sendMessage(id, message, img) {
   );
 }
 
+
+/**
+ * Метод, который инкримининиурет единицу к счетчику сообщений в сообщество
+ * @param {Number || String} id
+ */
 function addCount(id) {
   db.collection('groups').update(
     {
@@ -140,4 +147,74 @@ function addCount(id) {
       ++countMessages;
     }
   )
+}
+
+
+/**
+ *  Метод, который уведомляет адмиа сообщество о поступившем сообщении.
+ * @param id
+ * @param message
+ */
+function sendNotification(id, message) {
+  db.collection('groups').findOne(
+    {
+      _id: parseInt(id),
+      notification: true
+    },
+    ['name', 'userId'],
+    function(err, group) {
+      if(err) return console.error(err);
+      if (!group) return false;
+      var groupName = group.name;
+      var userId = group.userId;
+
+      checkForFriend(userId, function(isFriend) {
+        if(!isFriend) return false;
+        notify(userId, groupName, message);
+      })
+    }
+  );
+}
+
+/**
+ * метод проверяет, является ли человек другом бота.
+ * @param id
+ * @param callback
+ */
+function checkForFriend (id, callback) {
+  var methodUrl = 'https://api.vk.com/method/friends.areFriends?user_ids=' + id + '&access_token=' + token;
+
+  request(methodUrl, function(err, respond, body) {
+    if(err) {
+      console.error(err);
+      return callback(false);
+    }
+    body = JSON.parse(body);
+    if(!body || !body.response || !Array.isArray(body.response)) {
+      console.error(new Error('Something wrong'));
+      console.error(body);
+      return callback(false);
+    }
+    callback(body.response[0].friend_status === 3);
+  });
+}
+
+/**
+ * Уведомляет пользователя о сообщении.
+ * @param id
+ * @param groupName
+ * @param message
+ */
+function notify(id, groupName, message) {
+  var notification = 'В ваше сообщество ' + '"' + groupName + '"' + ' поступила новость: ' + message;
+  var methodUrl = 'https://api.vk.com/method/messages.send?user_id=' + id + '&message=' + notification + '&&access_token=' + token;
+
+  request(methodUrl, function(err, respond, body) {
+    if(err) return console.error(err);
+    body = JSON.parse(body);
+    if(!body || !body.response) {
+      console.error(new Error('Something wrong'));
+      console.error(body);
+    }
+  });
 }
