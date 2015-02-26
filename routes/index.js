@@ -108,8 +108,9 @@ function sendMessage(id, message, img) {
             body = JSON.parse(body);
             if (!body.response[0].id) return console.error(new Error('Something wrong!!!'));
 
+            var imgId = body.response[0].id;
             var methodUrl = 'https://api.vk.com/method/wall.post?owner_id=-' + id + '&friends_only=0&message=' + message +
-              '&attachment=' + body.response[0].id + '&access_token=' + token;
+              '&attachment=' + imgId + '&access_token=' + token;
             request(methodUrl, function(err, respond, body) {
               if(err) return console.error(err);
               body = JSON.parse(body);
@@ -118,7 +119,7 @@ function sendMessage(id, message, img) {
                 console.log(body);
                 return;
               }
-              sendNotification(id, message);
+              sendNotification(id, message, imgId);
               addCount(id);
             });
           });
@@ -154,8 +155,9 @@ function addCount(id) {
  *  Метод, который уведомляет адмиа сообщество о поступившем сообщении.
  * @param id
  * @param message
+ * @param imgId
  */
-function sendNotification(id, message) {
+function sendNotification(id, message, imgId) {
   db.collection('groups').findOne(
     {
       _id: parseInt(id),
@@ -170,7 +172,7 @@ function sendNotification(id, message) {
 
       checkForFriend(userId, function(isFriend) {
         if(!isFriend) return false;
-        notify(userId, groupName, message);
+        notify(userId, groupName, message, imgId);
       })
     }
   );
@@ -204,9 +206,11 @@ function checkForFriend (id, callback) {
  * @param id
  * @param groupName
  * @param message
+ * @param imgId
  */
-function notify(id, groupName, message) {
+function notify(id, groupName, message, imgId) {
   var notification = 'В ваше сообщество ' + '"' + groupName + '"' + ' поступила новость: ' + message;
+  if(imgId) notification += '&attachment=' + imgId;
   var methodUrl = 'https://api.vk.com/method/messages.send?user_id=' + id + '&message=' + notification + '&&access_token=' + token;
 
   request(methodUrl, function(err, respond, body) {
