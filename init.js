@@ -88,6 +88,7 @@ function routing(app, next) {
   app.get('/getAddedGroups', routes.getAddedGroups);
   app.get('/getGroupInfo', routes.getGroupInfo);
   app.post('/message', routes.message);
+  app.get('/setNotification', routes.setNotification);
   createRouts(app, next);
 }
 

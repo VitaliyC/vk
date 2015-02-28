@@ -32,14 +32,31 @@ exports.addGroup = function(req, res, app) {
   )
 };
 
+exports.setNotification = function(req, res) {
+  var id = parseInt(req.query.id);
+  var notification = req.query.notification == 'true';
+  db.collection('groups').update(
+    {
+      _id: id
+    },
+    {
+      $set: {
+        notification: notification
+      }
+    },
+    function(err, result) {
+      if(err) return console.error(err);
+      res.send(!!result);
+    }
+  );
+};
+
 exports.getAddedGroups = function(req, res) {
   db.collection('groups').find(
-    {}
+    {},
+    ['notification']
   ).toArray(function(err, data) {
       if(err) console.log(err);
-      data = data.map(function(i) {
-        return i._id;
-      });
       res.send(data);
     })
 };

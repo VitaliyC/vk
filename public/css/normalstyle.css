@@ -335,3 +335,20 @@ body {
     bottom: 0;
     right: 20px;
 }
+
+.notify-block {
+    position: relative;
+    top: 113px;
+    left: 20px;
+    font-size: 10pt;
+}
+
+input[type=checkbox]
+{
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(1.1); /* IE */
+    -moz-transform: scale(1.1); /* FF */
+    -webkit-transform: scale(1.1); /* Safari and Chrome */
+    -o-transform: scale(1.1); /* Opera */
+    padding: 10px;
+}

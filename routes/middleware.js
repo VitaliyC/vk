@@ -20,6 +20,9 @@ module.exports = function(app, callback) {
   app.use('/message', function(req, res, next) {
     validate(req.body, schemas.message, next);
   });
+  app.use('/setNotification', function(req, res, next) {
+    validate(req.query, schemas.setNotification, next);
+  });
   callback();
 };
 
@@ -36,10 +39,10 @@ var schemas = {
     required:['name','id','url','imgUrl','userId'],
     properties: {
       name: {type: 'string', minLength: 1, maxLength: 120},
-      id: {type: 'string', minLength: 1, maxLength: 10},
+      id: {type: 'string', pattern: '^[0-9]{1,10}$'},
       url: {type: 'string', minLength: 1, maxLength: 120},
       imgUrl: {type: 'string', minLength: 1, maxLength: 120},
-      userId: {type: 'string', minLength: 1, maxLength: 11}
+      userId: {type: 'string', pattern: '^[0-9]{1,10}$'}
     }
   },
   'getAddedGroups': {
@@ -63,14 +66,22 @@ var schemas = {
         required:['name','_id','url','imgUrl','userId'],
         properties: {
           name: {type: 'string', minLength: 1, maxLength: 120},
-          _id: {type: 'string', minLength: 1, maxLength: 10},
+          _id: {type: 'string', pattern: '^[0-9]{1,10}$'},
           url: {type: 'string', minLength: 1, maxLength: 120},
           imgUrl: {type: 'string', minLength: 1, maxLength: 120},
-          userId: {type: 'string', minLength: 1, maxLength: 11}
+          userId: {type: 'string', pattern: '^[0-9]{1,10}$'}
         }
       },
       message: {type: 'string', minLength: 0, maxLength:1000},
       img: {type: 'string', minLength: 1, maxLength:100}
+    }
+  },
+  'setNotification': {
+    type: 'object',
+    required: ['id', 'notification'],
+    properties: {
+      id: {type: 'string', pattern: '^[0-9]{1,10}$'},
+      notification: {type: 'string', enum:['true', 'false']}
     }
   }
 };

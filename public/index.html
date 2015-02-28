@@ -72,7 +72,13 @@
             <!-- ko foreach: groups -->
             <div class="group">
                 <div class="text" data-bind="text: name"></div>
-                <div class="img" data-bind="style: { backgroundImage: 'url(\'' + imgUrl() + '\')' }"></div>
+                <div class="img" data-bind="style: { backgroundImage: 'url(\'' + imgUrl() + '\')' }">
+                    <div class="notify-block" data-bind="visible: old">
+                        <span>Уведомления</span>
+                        <input type="checkbox" data-bind="checked: notification, event: {change: $parent.addNotify}">
+                    </div>
+
+                </div>
                 <div class="button" data-bind="click: $parent.addNewGroup, visible: isNew">
                     <img src="images/connectgroup.png">
                 </div>

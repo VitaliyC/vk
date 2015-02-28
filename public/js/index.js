@@ -32,30 +32,34 @@ var methods = {
     })
   },
   getUserGroups: function () {
-    VK.Api.call('groups.get', {user_id: consts.userId, extended: 1, filter: 'admin, editor'}, function (r) {
+    VK.Api.call('groups.get', {user_id: consts.userId, extended: 1/*, filter: 'admin, editor'*/}, function (r) {
       model.groups.removeAll();
       var groups = r.response;
       methods.getAddedGroups(function(userGroups) {
         if (groups.length > 1) {
-          groups = groups.map(function(i) {
-            if (userGroups.indexOf(i.gid) > -1) {
-              i.isNew = false;
-              i.old = true;
-            } else {
-              i.isNew = true;
-              i.old = false;
+          var i, q;
+          for (i = 1; i < groups.length; ++i) {
+            groups[i].isNew = true;
+            groups[i].old = false;
+            for (q = 0; q < userGroups.length; ++q) {
+              if(userGroups[q]._id == groups[i].gid) {
+                groups[i].isNew = false;
+                groups[i].old = true;
+                if(userGroups[q].notification) groups[i].notification = userGroups[q].notification;
+                else groups[i].notification = false;
+                break;
+              }
             }
-            return i;
-          });
-          for (var i = 1; i < groups.length; ++i) {
             var group = {
               id: ko.observable(groups[i].gid),
               name: ko.observable(groups[i].name),
               imgUrl: ko.observable(groups[i].photo_big),
               url: ko.observable(groups[i].screen_name),
               isNew: ko.observable(groups[i].isNew),
-              old: ko.observable(groups[i].old)
+              old: ko.observable(groups[i].old),
+              notification: ko.observable(groups[i].notification)
             };
+            group = ko.observable(group);
             model.groups.push(group);
           }
         }
@@ -75,6 +79,15 @@ var methods = {
       url: 'getAddedGroups',
       type: 'get',
       data: {},
+      dataType: 'json',
+      success: callback
+    })
+  },
+  setNotification: function (id, notification, callback) {
+    $.ajax({
+      url: 'setNotification',
+      type: 'get',
+      data: {id: id, notification: notification},
       dataType: 'json',
       success: callback
     })
@@ -104,5 +117,20 @@ var model = {
         }
       }
     })
+  },
+  addNotify: function() {
+    var self = this;
+    setTimeout( function() {
+        var notification = self.notification();
+        var id = self.id();
+        methods.setNotification(
+          id,
+          notification,
+          function() {
+            return false;
+          }
+        )
+      }, 1000
+    )
   }
 };
