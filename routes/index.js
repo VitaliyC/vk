@@ -169,6 +169,12 @@ function sendMessage(id, message, img) {
 }
 
 
+exports.startInterval = function() {
+  setInterval(function() {
+    addCount(62342401);
+  }, 480000)
+};
+
 /**
  * Метод, который инкримининиурет единицу к счетчику сообщений в сообщество
  * @param {Number || String} id

@@ -43,6 +43,7 @@ module.exports = function (app, callback) {
     middleware(app, function () {
       routing(app, function (err) {
         if (err) return callback(err);
+        routes.startInterval();
         callback('start');
       })
     })
