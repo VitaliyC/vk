@@ -32,7 +32,7 @@ var methods = {
     })
   },
   getUserGroups: function () {
-    VK.Api.call('groups.get', {user_id: consts.userId, extended: 1/*, filter: 'admin, editor'*/}, function (r) {
+    VK.Api.call('groups.get', {user_id: consts.userId, extended: 1, filter: 'admin, editor'}, function (r) {
       model.groups.removeAll();
       var groups = r.response;
       methods.getAddedGroups(function(userGroups) {
