@@ -35,18 +35,40 @@ exports.addGroup = function(req, res, app) {
 exports.setNotification = function(req, res) {
   var id = parseInt(req.query.id);
   var notification = req.query.notification == 'true';
-  db.collection('groups').update(
+
+  db.collection('groups').findAndModify(
     {
       _id: id
     },
+    [],
     {
       $set: {
         notification: notification
       }
     },
+    {
+      new: true
+    },
     function(err, result) {
       if(err) return console.error(err);
-      res.send(!!result);
+      if (!notification) return res.send(!!result);
+
+      var methodUrl = 'https://api.vk.com/method/friends.add?user_id=' + result.userId + '&text=Здравствуйте, чтобы получать от меня уведомления, добавте меня в друзья!!'
+      + '&access_token=' + token;
+
+      request(methodUrl, function(err, respond, body) {
+        if(err) {
+          console.error(err);
+          return callback(false);
+        }
+        body = JSON.parse(body);
+        if(!body || !body.response) {
+          console.error(new Error('Something wrong'));
+          console.error(body);
+          return callback(false);
+        }
+        res.send(!!result);
+      });
     }
   );
 };
