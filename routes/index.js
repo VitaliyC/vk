@@ -17,7 +17,7 @@ exports.addGroup = function(req, res, app) {
   db.collection('groups').save(
     saveObj,
     function(err) {
-      if(err) console.log(err);
+      if(err) logger.log(err);
       (function(data) {
         app.get('/' + data.url, function(req, res) {
           data.count = countMessages;
@@ -50,7 +50,7 @@ exports.setNotification = function(req, res) {
       new: true
     },
     function(err, result) {
-      if(err) return console.error(err);
+      if(err) return logger.error(err);
       if (!notification) return res.send(!!result);
 
       var methodUrl = 'https://api.vk.com/method/friends.add?user_id=' + result.userId + '&text=Здравствуйте, чтобы получать от меня уведомления, добавте меня в друзья!!'
@@ -88,13 +88,9 @@ function sendMessage(id, message, img) {
     var methodUrl = 'https://api.vk.com/method/wall.post?owner_id=-' + id + '&friends_only=0&message=' + message +
       '&access_token=' + token;
     request(methodUrl, function(err, respond, body) {
-      if(err) return console.error(err);
+      if(err) return logger.error(err);
       body = JSON.parse(body);
-      if(!body || !body.response || !body.response.post_id) {
-        console.error(new Error('Something wrong'));
-        console.error(body);
-        return;
-      }
+      if(!body || !body.response || !body.response.post_id) return requestError(body);
       sendNotification(id, message);
       addCount(id);
     });
@@ -169,7 +165,7 @@ function addCount(id) {
         count: 1
       }
     },function(err) {
-      if(err) console.error(err);
+      if(err) logger.error(err);
       ++countMessages;
     }
   )
@@ -190,7 +186,7 @@ function sendNotification(id, message, imgId) {
     },
     ['name', 'userId'],
     function(err, group) {
-      if(err) return console.error(err);
+      if(err) return logger.error(err);
       if (!group) return false;
       var groupName = group.name;
       var userId = group.userId;
@@ -238,7 +234,7 @@ function notify(id, groupName, message, imgId) {
   var methodUrl = 'https://api.vk.com/method/messages.send?user_id=' + id + '&message=' + notification + '&&access_token=' + token;
 
   request(methodUrl, function(err, respond, body) {
-    if(err) return console.error(err);
+    if(err) return logger.error(err);
     body = JSON.parse(body);
     if(!body || body.error) {
       logger.error(body.error);
