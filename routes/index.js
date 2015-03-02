@@ -59,7 +59,7 @@ exports.setNotification = function(req, res) {
       request(methodUrl, function(err, respond, body) {
         if(err) return res.send(false);
         body = JSON.parse(body);
-        if(!body || !body.response) requestError(body);
+        if(!body || !body.response) requestError(body, methodUrl);
         res.send(!!result);
       });
     }
@@ -90,7 +90,7 @@ function sendMessage(id, message, img) {
     request(methodUrl, function(err, respond, body) {
       if(err) return logger.error(err);
       body = JSON.parse(body);
-      if(!body || !body.response || !body.response.post_id) return requestError(body);
+      if(!body || !body.response || !body.response.post_id) return requestError(body, methodUrl);
       sendNotification(id, message);
       addCount(id);
     });
@@ -101,7 +101,7 @@ function sendMessage(id, message, img) {
   request(getWallUploadServer, function(err, res, body) {
       if(err) return logger.error(err);
       body = JSON.parse(body);
-      if (!body.response.upload_url) return requestError(body);
+      if (!body.response.upload_url) return requestError(body, getWallUploadServer);
 
       var path = __home + '/public/uploads/' + img;
       fs.stat(path, function(err, stats) {
@@ -115,7 +115,7 @@ function sendMessage(id, message, img) {
           }
         }).on('complete', function(data) {
           data = JSON.parse(data);
-          if (!data || !data.server || !data.photo || !data.hash) return requestError(body);
+          if (!data || !data.server || !data.photo || !data.hash) return requestError(body, null);
 
           var getWallUploadServer = 'https://api.vk.com/method/photos.saveWallPhoto?group_id=' + id + '&photo=' +
             data.photo + '&server=' + data.server + '&hash=' + data.hash + '&access_token=' + token;
@@ -133,7 +133,7 @@ function sendMessage(id, message, img) {
             request(methodUrl, function(err, respond, body) {
               if(err) return logger.error(err);
               body = JSON.parse(body);
-              if(!body || !body.response || !body.response.post_id) return requestError(body);
+              if(!body || !body.response || !body.response.post_id) return requestError(body, methodUrl);
               sendNotification(id, message, imgId);
               addCount(id);
             });
@@ -214,7 +214,7 @@ function checkForFriend (id, callback) {
     }
     body = JSON.parse(body);
     if(!body || !body.response || !Array.isArray(body.response)) {
-      requestError(body);
+      requestError(body, methodUrl);
       return callback(false);
     }
     callback(body.response[0].friend_status === 3);
@@ -236,9 +236,7 @@ function notify(id, groupName, message, imgId) {
   request(methodUrl, function(err, respond, body) {
     if(err) return logger.error(err);
     body = JSON.parse(body);
-    if(!body || body.error) {
-      logger.error(body.error);
-    }
+    if(!body || body.error) requestError(body, methodUrl);
   });
 }
 
@@ -255,8 +253,9 @@ function callback(req, res) {
   }
 }
 
-function requestError(body) {
+function requestError(body, methodUrl) {
   var error = new Error('Request error');
-  error.body = body;
+  error.methodUrl = methodUrl;
+  error.bodyError = body.error || body;
   logger.error(error);
 }
