@@ -54,6 +54,7 @@ module.exports = function (app) {
       }
     ],function(err) {
       if (err) return logger.error(err);
+      routes.startInterval();
       logger.info('Init done!')
     }
   );
