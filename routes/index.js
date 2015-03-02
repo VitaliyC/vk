@@ -5,7 +5,7 @@ var request = require('request'),
   fs = require('fs'),
   rest = require('restler');
 
-var token = '2f3b9efb3ac528935e925b63c340efe9645ddb1ad6c2c9cb9f84c5592694632fd97a51c8dc804d7cc1f41';
+var token = '591197cb61cbcb9c588f2a399e29c02b04a647bbaf43d49191c818bf0b84a7ea22143003d18b9655e5167';
 exports.addGroup = function(req, res, app) {
   var saveObj = {
     name: req.query.name,
