@@ -5,6 +5,9 @@ var mongo = require('mongodb'),
   middleware = require('./routes/middleware'),
   fs = require('fs'),
   multer = require('multer'),
+  logger = require('winston'),
+  MongoDBLogger = require('winston-mongodb').MongoDB,
+  async = require('async'),
   routes = require('./routes');
 
 var fileFilter = ['image/jpeg', 'image/png'];
@@ -24,30 +27,36 @@ var multerConf = {
   rename: function (fieldname, filename) {
     return filename + Date.now();
   },
-  onFileUploadStart: function (file) {
-    console.log(file.originalname + ' is starting ...')
-  },
   onFileUploadComplete: function (file) {
     if(fileFilter.indexOf(file.mimetype) == -1) {
       fs.unlink('./' + file.path);
       return false;
     }
-    console.log(file.fieldname + ' uploaded to  ' + file.path);
     file.success = true;
   }
 };
 
-module.exports = function (app, callback) {
-  dbInit(function (err) {
-    if (err) return callback(err);
-    middleware(app, function () {
-      routing(app, function (err) {
-        if (err) return callback(err);
-        routes.startInterval();
-        callback('start');
-      })
-    })
-  })
+module.exports = function (app) {
+  global.async = async;
+  async.series(
+    [
+      function (next) {
+        dbInit(next);
+      },
+      function(next) {
+        initLogger(next);
+      },
+      function (next) {
+        middleware(app, next);
+      },
+      function(next) {
+        routing(app, next);
+      }
+    ],function(err) {
+      if (err) return logger.error(err);
+      logger.info('Init done!')
+    }
+  );
 };
 
 function dbInit(next) {
@@ -72,6 +81,22 @@ function dbInit(next) {
       );
     }
   );
+}
+
+function initLogger(next) {
+  logger.remove(logger.transports.Console);
+  var mongoSetting =  {
+    "db": 'mongodb://localhost:27017/aposting',
+    "collection": "logs",
+    storeHost: true
+  };
+  mongoSetting.level = 'error';
+  logger.add(MongoDBLogger, mongoSetting);
+  var consoleLogLevel = 'debug';
+  logger.add(logger.transports.Console,
+    { level: consoleLogLevel, colorize: true, timestamp: true });
+  global.logger = logger;
+  next();
 }
 
 function routing(app, next) {

@@ -28,9 +28,12 @@ module.exports = function(app, callback) {
 
 function validate(object, schema, next) {
   var valid = validator.validate(object, schema);
-  var err = validator.getLastErrors();
+  var errMessage = validator.getLastErrors();
   if(valid) return next();
-  console.error(err);
+  var err = new Error();
+  err.name = 'Validation error';
+  err.message = errMessage;
+  logger.error(err);
 }
 
 var schemas = {

@@ -57,16 +57,9 @@ exports.setNotification = function(req, res) {
       + '&access_token=' + token;
 
       request(methodUrl, function(err, respond, body) {
-        if(err) {
-          console.error(err);
-          return callback(false);
-        }
+        if(err) return res.send(false);
         body = JSON.parse(body);
-        if(!body || !body.response) {
-          console.error(new Error('Something wrong'));
-          console.error(body);
-          return callback(false);
-        }
+        if(!body || !body.response) requestError(body);
         res.send(!!result);
       });
     }
@@ -77,17 +70,11 @@ exports.getAddedGroups = function(req, res) {
   db.collection('groups').find(
     {},
     ['notification']
-  ).toArray(function(err, data) {
-      if(err) console.log(err);
-      res.send(data);
-    })
+  ).toArray(callback(req, res));
 };
 
 exports.getGroupInfo = function(req, res) {
-  db.collection('groups').findOne(req.query, function(err, group) {
-    if(err) console.log(err);
-    res.send(group);
-  })
+  db.collection('groups').findOne(req.query, callback(req, res))
 };
 
 exports.message = function(req, res) {
@@ -116,13 +103,13 @@ function sendMessage(id, message, img) {
 
   var getWallUploadServer = 'https://api.vk.com/method/photos.getWallUploadServer?group_id=' + id + '&access_token='+token;
   request(getWallUploadServer, function(err, res, body) {
-      if(err) return console.error(err);
+      if(err) return logger.error(err);
       body = JSON.parse(body);
-      if (!body.response.upload_url) return console.error(new Error('No upload_url'));
+      if (!body.response.upload_url) return requestError(body);
 
       var path = __home + '/public/uploads/' + img;
       fs.stat(path, function(err, stats) {
-        if(err) return console.error(err);
+        if(err) return logger.error(err);
 
         rest.post(body.response.upload_url, {
           multipart: true,
@@ -132,32 +119,25 @@ function sendMessage(id, message, img) {
           }
         }).on('complete', function(data) {
           data = JSON.parse(data);
-          if (!data || !data.server || !data.photo || !data.hash) {
-            console.error(new Error('Something wrong'));
-            console.log(data);
-            return;
-          }
+          if (!data || !data.server || !data.photo || !data.hash) return requestError(body);
 
           var getWallUploadServer = 'https://api.vk.com/method/photos.saveWallPhoto?group_id=' + id + '&photo=' +
             data.photo + '&server=' + data.server + '&hash=' + data.hash + '&access_token=' + token;
 
           request(getWallUploadServer, function(err, res, body) {
-            if(err) return console.error(err);
+            if(err) return logger.error(err);
 
             body = JSON.parse(body);
-            if (!body.response[0].id) return console.error(new Error('Something wrong!!!'));
+            if (!body.response[0].id) return logger.error(body);
 
             var imgId = body.response[0].id;
             var methodUrl = 'https://api.vk.com/method/wall.post?owner_id=-' + id + '&friends_only=0&message=' + message +
               '&attachment=' + imgId + '&access_token=' + token;
+
             request(methodUrl, function(err, respond, body) {
-              if(err) return console.error(err);
+              if(err) return logger.error(err);
               body = JSON.parse(body);
-              if(!body || !body.response || !body.response.post_id) {
-                console.error(new Error('Something wrong'));
-                console.log(body);
-                return;
-              }
+              if(!body || !body.response || !body.response.post_id) return requestError(body);
               sendNotification(id, message, imgId);
               addCount(id);
             });
@@ -233,13 +213,12 @@ function checkForFriend (id, callback) {
 
   request(methodUrl, function(err, respond, body) {
     if(err) {
-      console.error(err);
+      logger.error(err);
       return callback(false);
     }
     body = JSON.parse(body);
     if(!body || !body.response || !Array.isArray(body.response)) {
-      console.error(new Error('Something wrong'));
-      console.error(body);
+      requestError(body);
       return callback(false);
     }
     callback(body.response[0].friend_status === 3);
@@ -261,9 +240,27 @@ function notify(id, groupName, message, imgId) {
   request(methodUrl, function(err, respond, body) {
     if(err) return console.error(err);
     body = JSON.parse(body);
-    if(!body || !body.response) {
-      console.error(new Error('Something wrong'));
-      console.error(body);
+    if(!body || body.error) {
+      logger.error(body.error);
     }
   });
+}
+
+function callback(req, res) {
+  return function(err, data) {
+    if (err) {
+      if (typeof(err) == 'string') err = new Error(err);
+      err.path = req.path;
+      err.data = req.query;
+      logger.error(err);
+    } else {
+      res.send(data);
+    }
+  }
+}
+
+function requestError(body) {
+  var error = new Error('Request error');
+  error.body = body;
+  logger.error(error);
 }
