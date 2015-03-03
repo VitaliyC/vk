@@ -6,7 +6,14 @@ var utils = require('./../utils'),
   lib = require('./../lib');
 
 exports.addGroup = function(req, res, app) {
-  lib.addGroup(req.query, function(err) {
+  var saveObj = {
+    name: req.query.name,
+    _id: parseInt(req.query.id),
+    url: req.query.url,
+    imgUrl: req.query.imgUrl,
+    userId: parseInt(req.query.userId)
+  };
+  lib.addGroup(saveObj, function(err) {
     if(err) logger.log(err);
     (function(data) {
       app.get('/' + data.url, function(req, res) {
