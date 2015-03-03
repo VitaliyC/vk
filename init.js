@@ -8,6 +8,7 @@ var mongo = require('mongodb'),
   logger = require('winston'),
   MongoDBLogger = require('winston-mongodb').MongoDB,
   async = require('async'),
+  requests = require('./routes/requests'),
   routes = require('./routes');
 
 var fileFilter = ['image/jpeg', 'image/png'];
@@ -54,7 +55,8 @@ module.exports = function (app) {
       }
     ],function(err) {
       if (err) return logger.error(err);
-      routes.startInterval();
+      requests.startCountInterval();
+      requests.startMessageInterval();
       logger.info('Init done!')
     }
   );
@@ -76,7 +78,8 @@ function dbInit(next) {
           }
         ],function(err, data) {
           if(err) return next(err);
-          global.countMessages = data[0].count;
+          if(data.length == 0) global.countMessages = 0;
+          else global.countMessages = data[0].count;
           next()
         }
       );
