@@ -105,7 +105,7 @@ function initLogger(next) {
 
 function routing(app, next) {
   app.post('/loadPhoto', multer(multerConf), function (req, res) {
-    if (req.files.userPhoto.success) {
+    if (req.files.userPhoto && req.files.userPhoto.success) {
       res.send({
         filePath: 'http://aposting.me/uploads/' + req.files.userPhoto.name,
         name: req.files.userPhoto.name
