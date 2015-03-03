@@ -25,14 +25,17 @@ exports.startMessageInterval = function() {
 
 
 exports.addFriendship = function(userId, callback) {
-  var methodUrl = 'https://api.vk.com/method/friends.add?user_id=' + userId + '&text=Здравствуйте, чтобы получать от меня уведомления, добавте меня в друзья!!'
-    + '&access_token=' + token;
+  checkForFriend(userId, function(friendStatus) {
+    if(friendStatus != 2) return false;
+    var methodUrl = 'https://api.vk.com/method/friends.add?user_id=' + userId + '&text=Здравствуйте, чтобы получать от меня уведомления, добавте меня в друзья!!'
+      + '&access_token=' + token;
 
-  request(methodUrl, function(err, respond, body) {
-    if(err) return callback(false);
-    body = JSON.parse(body);
-    if(!body || !body.response) utils.requestError(body, methodUrl);
-    callback(true);
+    request(methodUrl, function(err, respond, body) {
+      if(err) return callback(false);
+      body = JSON.parse(body);
+      if(!body || !body.response) utils.requestError(body, methodUrl);
+      callback(true);
+    });
   });
 };
 
@@ -160,8 +163,8 @@ function sendNotification(id, message, imgId) {
       var groupName = group.name;
       var userId = group.userId;
 
-      checkForFriend(userId, function(isFriend) {
-        if(!isFriend) return false;
+      checkForFriend(userId, function(friendStatus) {
+        if(friendStatus != 3) return false;
         notify(userId, groupName, message, imgId);
       })
     }
@@ -179,14 +182,14 @@ function checkForFriend (id, callback) {
   request(methodUrl, function(err, respond, body) {
     if(err) {
       logger.error(err);
-      return callback(false);
+      return callback(0);
     }
     body = JSON.parse(body);
     if(!body || !body.response || !Array.isArray(body.response)) {
       utils.requestError(body, methodUrl);
-      return callback(false);
+      return callback(0);
     }
-    callback(body.response[0].friend_status === 3);
+    callback(body.response[0].friend_status);
   });
 }
 
