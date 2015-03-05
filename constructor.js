@@ -16,12 +16,5 @@ module.exports = function() {
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(bodyParser());
-
-  app.get('/aaa', function(req, res) {
-    console.log(req.hostname);
-    console.log(req.ip);
-    res.end('forbidden')
-  })
-
   init(app);
 };
