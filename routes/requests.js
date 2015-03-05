@@ -80,7 +80,7 @@ function sendMessage(id, message, img) {
   request(getWallUploadServer, function(err, res, body) {
       if(err) return logger.error(err);
       body = JSON.parse(body);
-      if (!body.response.upload_url) return utils.requestError(body, getWallUploadServer);
+      if (!body.response || !body.response.upload_url) return utils.requestError(body, getWallUploadServer);
 
       var path = __home + '/public/uploads/' + img;
       fs.stat(path, function(err, stats) {
