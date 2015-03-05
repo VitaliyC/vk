@@ -20,6 +20,19 @@ module.exports = function(app, callback) {
   app.use('/message', function(req, res, next) {
     validate(req.body, schemas.message, next);
   });
+  app.use('/message', function(req, res, next) {
+    var reg = /.+\.\w\w.*/;
+    if (reg.test(req.body.message)) {
+      var errObj = {
+        ip: req.ip,
+        message: req.body.message
+      };
+      logger.error(errObj);
+      res.send({success: true});
+      return false;
+    }
+    next();
+  });
   app.use('/setNotification', function(req, res, next) {
     validate(req.query, schemas.setNotification, next);
   });
