@@ -7,7 +7,7 @@ var request = require('request'),
   rest = require('restler');
 
 var stack = [];
-var token = 'f64ae38f2a432406d016b9ff06c905bbcff2377101e236d2322589078c8aad2a43e30ce71f57baa11a715';
+var token = 'c150e0438761607660fd1ffaf46b5acc4d764e96ef5c5a04ffa9cfd58b921837f13739a25574d431c040f';
 
 exports.addToStack = addToStack;
 
